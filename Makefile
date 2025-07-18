@@ -3,12 +3,12 @@ BINARY_NAME := dnscollector
 GO_VERSION := $(shell go env GOVERSION | sed -n 's/go\([0-9]\+\.[0-9]\+\).*/\1/p')
 
 GO_LOGGER := 1.1.1
-GO_POWERDNS_PROTOBUF := 1.4.0
+GO_POWERDNS_PROTOBUF := 1.5.0
 GO_DNSTAP_PROTOBUF := 1.3.0
 GO_FRAMESTREAM := 1.3.1
 GO_CLIENTSYSLOG := 1.0.1
 GO_TOPMAP := 1.0.2
-GO_NETUTILS := 1.5.0
+GO_NETUTILS := 1.7.0
 
 BUILD_TIME := $(shell LANG=en_US date +"%F_%T_%z")
 COMMIT := $(shell git rev-parse --short HEAD)
@@ -28,7 +28,7 @@ ifndef $(GOPATH)
 	export GOPATH
 endif
 
-.PHONY: all check-go dep lint build clean goversion
+.PHONY: all check-go dep lint build clean goversion stats
 
 # This target depends on dep and build.
 all: check-go dep build
@@ -70,13 +70,41 @@ lint:
 
 # Runs various tests for different packages.
 tests: check-go
-	@go test -race -cover -v
-	@go test ./pkgconfig/ -race -cover -v
-	@go test ./pkginit/ -race -cover -v
-	@go test ./netutils/ -race -cover -v
-	@go test ./telemetry/ -race -cover -v
-	@go test -timeout 90s ./transformers/ -race -cover -v
-	@go test -timeout 180s ./workers/ -race -cover -v
+	@echo "Running tests..."
+	@go test -v -race -coverprofile=coverage.out -json ./... | tee test_output.json | \
+	jq -r 'select(.Output != null) | .Output' | sed '/^\s*$$/d' | sed 's/^[ \t]*//'
+	go tool cover -func=coverage.out
+
+	@TEST_COUNT=$$(jq -r 'select(.Action == "pass" or .Action == "fail") | .Test' test_output.json | sort -u | wc -l); \
+	COVERAGE=$$(go tool cover -func=coverage.out | grep total: | awk '{print $$3}'); \
+	echo "Total executed tests: $$TEST_COUNT"; \
+	echo "Code coverage: $$COVERAGE"
+
+	@rm -f test_output.json coverage.out
+
+tests2:
+	@echo "Running tests..."
+	@go test -v -race -coverprofile=coverage.out -json ./... | tee test_output.json |
+	jq -r 'select(.Output != null) | .Output' | sed '/^\s*$$/d' | sed 's/^[ \t]*//'
+	go tool cover -func=coverage.out
+
+	@TEST_COUNT=$$(jq -r 'select(.Action == "pass" or .Action == "fail") | .Test' test_output.json | sort -u | wc -l); \
+	COVERAGE=$$(go tool cover -func=coverage.out | grep total: | awk '{print $$3}'); \
+	echo "Total executed tests: $$TEST_COUNT"; \
+	echo "Code coverage: $$COVERAGE"
+
+	@rm -f test_output.json coverage.out
+
+stats:
+	@echo "Calculating Go code statistics (excluding tests)..."
+	@TOTAL_LINES=$$(find . -name '*.go' ! -name '*_test.go' -print0 | xargs -0 cat | wc -l); \
+	COMMENT_LINES=$$(find . -name '*.go' ! -name '*_test.go' -print0 | xargs -0 grep -E '^\s*//' | wc -l); \
+	EMPTY_LINES=$$(find . -name '*.go' ! -name '*_test.go' -print0 | xargs -0 grep -E '^\s*$$' | wc -l); \
+	CODE_LINES=$$((TOTAL_LINES - COMMENT_LINES - EMPTY_LINES)); \
+	echo "Total lines        : $$TOTAL_LINES"; \
+	echo "Comment lines      : $$COMMENT_LINES"; \
+	echo "Empty lines        : $$EMPTY_LINES"; \
+	echo "Effective code lines: $$CODE_LINES"
 
 # Cleans the project using go clean.
 clean: check-go
