@@ -134,15 +134,14 @@ See the [full list of metrics](./../metrics.txt).
 |-------------------------------------------------|------------------------------------
 | dnscollector_build_info                         | Build info
 | dnscollector_total_requesters_lru               | Total number of DNS clients most recently observed per stream identity.
-| dnscollector_total_domains_lru                | Total number of serverfail domains most recently observed per stream identity
-| dnscollector_total_noerror_domains_lru                | Total number of serverfail domains most recently observed per stream identity
-| dnscollector_total_servfail_domains_lru                | Total number of serverfail domains most recently observed per stream identity
-| dnscollector_total_nonexistent_domains_lru                | Total number of NX domains most recently observed per stream identity
-| dnscollector_dnsmessage_total                   | Counter of total of DNS messages
+| dnscollector_total_domains_lru                  | Total number of domains most recently observed per stream identity
+| dnscollector_total_noerror_domains_lru          | Total number of noerror domains most recently observed per stream identity
+| dnscollector_total_servfail_domains_lru         | Total number of serverfail domains most recently observed per stream identity
+| dnscollector_total_nonexistent_domains_lru      | Total number of NX domains most recently observed per stream identity
+| dnscollector_dnsmessages_total                  | Counter of total of DNS messages
 | dnscollector_queries_total                      | Counter of total of queries
 | dnscollector_replies_total                      | Counter of total of replies
 | dnscollector_qtypes_total                       | Counter of total of queries per qtypes
-| dnscollector_dnsmessage_total                   | Counter of total of DNS messages
 | dnscollector_ipprotocol_total                   | The total number of DNS messages per IP protocol (UDP, TCPs)
 | dnscollector_ipversion_total                    | The total number of DNS messages per IP version (v4, v6)
 | dnscollector_bytes_total                        | The total bytes sent and received
@@ -158,11 +157,11 @@ See the [full list of metrics](./../metrics.txt).
 | dnscollector_throughput_ops                     | Number of ops per second received, partitioned by stream
 | dnscollector_throughput_ops_max                 | Max number of ops per second observed, partitioned by stream
 | dnscollector_total_tlds_lru                     | Total number of tld most recently observed per stream identity
+| dnscollector_top_tlds                           | Number of hit per tld - topN
 | dnscollector_top_domains                        | Number of hit per domain topN, partitioned by stream and qname
 | dnscollector_top_nxdomains                      | Number of hit per nx domain topN, partitioned by stream and qname
 | dnscollector_top_sfdomains                      | Number of hit per servfail domain topN, partitioned by stream and qname
 | dnscollector_top_requesters                     | Number of hit per requester topN, partitioned by client IP
-| dnscollector_top_tlds                           | Number of hit per tld - topN
 | dnscollector_top_unanswered                     | Number of hit per unanswered domain - topN
 | dnscollector_total_unanswered_lru               | Total number of unanswered domains most recently observed per stream identity
 | dnscollector_total_suspicious_lru               | Total number of suspicious domains most recently observed per stream identity
